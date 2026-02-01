@@ -7,15 +7,6 @@ const props = defineProps<{
   packageName: string
 }>()
 
-const chartModal = useModal('chart-modal')
-
-const isChartModalOpen = shallowRef(false)
-function openChartModal() {
-  isChartModalOpen.value = true
-  // ensure the component renders before opening the dialog
-  nextTick(() => chartModal.open())
-}
-
 const { data: packument } = usePackage(() => props.packageName)
 const createdIso = computed(() => packument.value?.time?.created ?? null)
 
@@ -199,15 +190,14 @@ const config = computed(() => {
   <div class="space-y-8">
     <CollapsibleSection id="downloads" :title="$t('package.downloads.title')">
       <template #actions>
-        <button
-          type="button"
-          @click="openChartModal"
+        <NuxtLink
+          :to="{ name: 'analytics', params: { package: props.packageName.split('/') } }"
           class="link-subtle font-mono text-sm inline-flex items-center gap-1.5 ms-auto shrink-0 self-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/50 rounded"
           :title="$t('package.downloads.analyze')"
         >
           <span class="i-carbon:data-analytics w-4 h-4" aria-hidden="true" />
           <span class="sr-only">{{ $t('package.downloads.analyze') }}</span>
-        </button>
+        </NuxtLink>
       </template>
 
       <div class="w-full overflow-hidden">
@@ -247,15 +237,6 @@ const config = computed(() => {
       </div>
     </CollapsibleSection>
   </div>
-
-  <ChartModal v-if="isChartModalOpen" @close="isChartModalOpen = false">
-    <PackageDownloadAnalytics
-      :weeklyDownloads="weeklyDownloads"
-      :inModal="true"
-      :packageName="props.packageName"
-      :createdIso="createdIso"
-    />
-  </ChartModal>
 </template>
 
 <style>
